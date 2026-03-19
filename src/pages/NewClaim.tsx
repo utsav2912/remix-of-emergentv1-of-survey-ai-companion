@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { StepIndicator } from "@/components/new-claim/StepIndicator";
 import { Step1VehiclePolicy } from "@/components/new-claim/Step1VehiclePolicy";
 import { PhotoUploadStep } from "@/components/new-claim/PhotoUploadStep";
+import { Step3PartsDamage } from "@/components/new-claim/Step3PartsDamage";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
