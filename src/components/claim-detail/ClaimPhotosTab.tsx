@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Camera, X, MapPin, Clock, Car, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
