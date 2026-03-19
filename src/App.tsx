@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Claims from "./pages/Claims";
 import NewClaim from "./pages/NewClaim";
@@ -23,7 +24,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/dashboard" element={<Index />} />
           <Route path="/claims" element={<Claims />} />
           <Route path="/new-claim" element={<NewClaim />} />
           <Route path="/claims/:id" element={<ClaimDetail />} />

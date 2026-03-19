@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Claims", url: "/claims", icon: FileText },
   { title: "New Claim", url: "/new-claim", icon: FilePlus },
   { title: "Reports", url: "/reports", icon: BarChart3 },
