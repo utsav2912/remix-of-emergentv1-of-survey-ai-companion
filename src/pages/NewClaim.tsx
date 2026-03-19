@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { StepIndicator } from "@/components/new-claim/StepIndicator";
 import { Step1VehiclePolicy } from "@/components/new-claim/Step1VehiclePolicy";
 import { PhotoUploadStep } from "@/components/new-claim/PhotoUploadStep";
+import { Step3PartsDamage } from "@/components/new-claim/Step3PartsDamage";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -61,8 +62,10 @@ const NewClaim = () => {
         toast.error("Please fill in all required fields");
       }
     } else if (currentStep === 2) {
-      toast.success("Step 2 complete — proceeding to Parts & Damage");
-      // Future: setCurrentStep(3)
+      setCurrentStep(3);
+    } else if (currentStep === 3) {
+      toast.success("Step 3 complete — proceeding to Review");
+      // Future: setCurrentStep(4)
     }
   };
 
@@ -97,6 +100,7 @@ const NewClaim = () => {
         )}
 
         {currentStep === 2 && <PhotoUploadStep />}
+        {currentStep === 3 && <Step3PartsDamage />}
 
         {/* Footer */}
         <div className="flex items-center justify-between pb-6">
