@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import Claims from "./pages/Claims";
 import NewClaim from "./pages/NewClaim";
+import ClaimDetail from "./pages/ClaimDetail";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/claims" element={<Claims />} />
           <Route path="/new-claim" element={<NewClaim />} />
+          <Route path="/claims/:id" element={<ClaimDetail />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
