@@ -34,7 +34,7 @@ const ocrColors: Record<string, string> = {
 };
 
 export function ClaimDocumentsTab() {
-  const [docs, setDocs] = useState(mockDocs);
+  const [docs] = useState(mockDocs);
   const [uploadType, setUploadType] = useState("Policy Document");
   const fileRef = useRef<HTMLInputElement>(null);
 

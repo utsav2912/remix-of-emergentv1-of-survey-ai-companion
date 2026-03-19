@@ -18,7 +18,7 @@ import { ClaimDocumentsTab } from "@/components/claim-detail/ClaimDocumentsTab";
 import { ClaimHistoryTab } from "@/components/claim-detail/ClaimHistoryTab";
 
 const ClaimDetail = () => {
-  const { id } = useParams();
+  const { id: _id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
 
