@@ -62,8 +62,10 @@ const NewClaim = () => {
         toast.error("Please fill in all required fields");
       }
     } else if (currentStep === 2) {
-      toast.success("Step 2 complete — proceeding to Parts & Damage");
-      // Future: setCurrentStep(3)
+      setCurrentStep(3);
+    } else if (currentStep === 3) {
+      toast.success("Step 3 complete — proceeding to Review");
+      // Future: setCurrentStep(4)
     }
   };
 
