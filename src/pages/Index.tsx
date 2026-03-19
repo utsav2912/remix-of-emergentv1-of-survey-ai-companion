@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { RecentClaimsTable } from "@/components/dashboard/RecentClaimsTable";
@@ -9,18 +8,34 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClipboardList, Camera, FileText, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [isNewUser] = useState(false);
-  const [isLoading] = useState(false);
+  const { user, profile } = useAuth();
+
+  const { data: claimsCount, isLoading } = useQuery({
+    queryKey: ["claims-count", user?.id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("claims")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user!.id);
+      return count ?? 0;
+    },
+    enabled: !!user,
+  });
+
+  const isNewUser = !isLoading && claimsCount === 0;
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || "Surveyor";
 
   return (
     <AppLayout title="Dashboard">
       <div className="space-y-6">
         {isLoading ? (
           <>
-            {/* KPI Skeleton */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
                 <Card key={i} className="shadow-sm">
@@ -32,7 +47,6 @@ const Index = () => {
                 </Card>
               ))}
             </div>
-            {/* Table Skeleton */}
             <Card className="shadow-sm">
               <CardContent className="p-6 space-y-4">
                 <Skeleton className="h-5 w-32" />
@@ -48,10 +62,9 @@ const Index = () => {
             </Card>
           </>
         ) : isNewUser ? (
-          /* Welcome / Empty state */
           <Card className="shadow-sm border-primary/20 bg-primary/5">
             <CardContent className="py-10 text-center space-y-6">
-              <h2 className="text-2xl font-bold text-foreground">Welcome, Ramesh! Let's start your first survey.</h2>
+              <h2 className="text-2xl font-bold text-foreground">Welcome, {displayName}! Let's start your first survey.</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
                 {[
                   { step: 1, icon: ClipboardList, label: "Create claim", desc: "Enter vehicle & policy details" },

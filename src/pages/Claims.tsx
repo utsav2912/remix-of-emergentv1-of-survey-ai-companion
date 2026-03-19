@@ -5,93 +5,41 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+  Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
-  Plus,
-  Search,
-  MoreHorizontal,
-  CalendarIcon,
-  FileText,
-  Pencil,
-  Trash2,
-  ExternalLink,
-  FileDown,
-  Download,
-  ClipboardList,
-  SlidersHorizontal,
+  Plus, Search, MoreHorizontal, CalendarIcon, FileText, Pencil,
+  Trash2, ExternalLink, FileDown, Download, ClipboardList, SlidersHorizontal,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type ClaimStatus = "Draft" | "In Review" | "Final" | "Disputed";
-type ReportStatus = "Generated" | "Pending";
 
-interface Claim {
-  id: string;
-  vehicle: string;
-  owner: string;
-  insurer: string;
-  idv: number;
-  status: ClaimStatus;
-  created: string;
-  report: ReportStatus;
-}
-
-const mockClaims: Claim[] = [
-  { id: "CLM-2024-0451", vehicle: "Maruti Swift VXI", owner: "Rajesh Kumar", insurer: "New India", idv: 450000, status: "In Review", created: "18 Mar 2026", report: "Pending" },
-  { id: "CLM-2024-0450", vehicle: "Hyundai Creta SX", owner: "Priya Sharma", insurer: "Oriental", idv: 1250000, status: "Draft", created: "17 Mar 2026", report: "Pending" },
-  { id: "CLM-2024-0449", vehicle: "Tata Nexon EV Max", owner: "Amit Patel", insurer: "United India", idv: 1650000, status: "Final", created: "16 Mar 2026", report: "Generated" },
-  { id: "CLM-2024-0448", vehicle: "Mahindra XUV700 AX7", owner: "Sunita Devi", insurer: "National", idv: 2100000, status: "Disputed", created: "15 Mar 2026", report: "Generated" },
-  { id: "CLM-2024-0447", vehicle: "Honda City ZX CVT", owner: "Vikram Singh", insurer: "New India", idv: 1350000, status: "Final", created: "14 Mar 2026", report: "Generated" },
-  { id: "CLM-2024-0446", vehicle: "Tata Harrier XZ+", owner: "Deepak Gupta", insurer: "Oriental", idv: 1800000, status: "In Review", created: "13 Mar 2026", report: "Pending" },
-  { id: "CLM-2024-0445", vehicle: "Maruti Baleno Alpha", owner: "Neha Agarwal", insurer: "United India", idv: 780000, status: "Draft", created: "12 Mar 2026", report: "Pending" },
-  { id: "CLM-2024-0444", vehicle: "Hyundai Venue S+", owner: "Arjun Reddy", insurer: "National", idv: 920000, status: "Final", created: "11 Mar 2026", report: "Generated" },
-];
-
-const statusStyles: Record<ClaimStatus, string> = {
+const statusStyles: Record<string, string> = {
   Draft: "bg-muted text-muted-foreground hover:bg-muted",
   "In Review": "bg-primary/10 text-primary hover:bg-primary/10",
   Final: "bg-success/10 text-success hover:bg-success/10",
   Disputed: "bg-destructive/10 text-destructive hover:bg-destructive/10",
-};
-
-const reportStyles: Record<ReportStatus, string> = {
-  Generated: "bg-success/10 text-success hover:bg-success/10",
-  Pending: "bg-muted text-muted-foreground hover:bg-muted",
 };
 
 function formatINR(val: number) {
@@ -114,12 +62,7 @@ function FilterControls({
     <div className="space-y-4">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search claims..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 text-base"
-        />
+        <Input placeholder="Search claims..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 text-base" />
       </div>
       <Select value={statusFilter} onValueChange={setStatusFilter}>
         <SelectTrigger className="text-base min-h-[44px]"><SelectValue placeholder="Status" /></SelectTrigger>
@@ -176,6 +119,7 @@ function FilterControls({
 
 const Claims = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [insurerFilter, setInsurerFilter] = useState("all");
@@ -183,26 +127,42 @@ const Claims = () => {
   const [dateTo, setDateTo] = useState<Date>();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
+  const { data: claims = [], isLoading } = useQuery({
+    queryKey: ["claims", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("claims")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const hasFilters = !!(search || statusFilter !== "all" || insurerFilter !== "all" || dateFrom || dateTo);
 
   const filtered = useMemo(() => {
-    return mockClaims.filter((c) => {
+    return claims.filter((c) => {
       if (search) {
         const q = search.toLowerCase();
-        if (!c.id.toLowerCase().includes(q) && !c.vehicle.toLowerCase().includes(q) && !c.owner.toLowerCase().includes(q)) return false;
+        if (
+          !c.id.toLowerCase().includes(q) &&
+          !(c.vehicle_make || "").toLowerCase().includes(q) &&
+          !(c.vehicle_model || "").toLowerCase().includes(q) &&
+          !(c.registration_number || "").toLowerCase().includes(q)
+        ) return false;
       }
       if (statusFilter !== "all" && c.status !== statusFilter) return false;
       if (insurerFilter !== "all" && c.insurer !== insurerFilter) return false;
       return true;
     });
-  }, [search, statusFilter, insurerFilter]);
+  }, [claims, search, statusFilter, insurerFilter]);
 
   const clearFilters = () => {
-    setSearch("");
-    setStatusFilter("all");
-    setInsurerFilter("all");
-    setDateFrom(undefined);
-    setDateTo(undefined);
+    setSearch(""); setStatusFilter("all"); setInsurerFilter("all");
+    setDateFrom(undefined); setDateTo(undefined);
   };
 
   const toggleSelect = (id: string) => {
@@ -214,19 +174,17 @@ const Claims = () => {
   };
 
   const toggleAll = () => {
-    if (selected.size === filtered.length) {
-      setSelected(new Set());
-    } else {
-      setSelected(new Set(filtered.map((c) => c.id)));
-    }
+    if (selected.size === filtered.length) setSelected(new Set());
+    else setSelected(new Set(filtered.map((c) => c.id)));
   };
 
   const filterProps = { search, setSearch, statusFilter, setStatusFilter, insurerFilter, setInsurerFilter, dateFrom, setDateFrom, dateTo, setDateTo, clearFilters, hasFilters };
 
+  const vehicleName = (c: typeof claims[0]) => [c.vehicle_make, c.vehicle_model].filter(Boolean).join(" ") || "Unnamed Vehicle";
+
   return (
     <AppLayout title="Claims">
       <div className="space-y-4 md:space-y-5">
-        {/* Page header */}
         <div className="flex items-center justify-between">
           <div />
           <Button onClick={() => navigate("/new-claim")} className="gap-2 min-h-[44px]">
@@ -240,7 +198,7 @@ const Claims = () => {
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[220px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search by vehicle, claim ID, or policy number..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 text-base" />
+                <Input placeholder="Search by vehicle, claim ID, or registration..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 text-base" />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[150px] min-h-[44px]"><SelectValue placeholder="Status" /></SelectTrigger>
@@ -262,26 +220,6 @@ const Claims = () => {
                   <SelectItem value="National">National</SelectItem>
                 </SelectContent>
               </Select>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal min-h-[44px]", !dateFrom && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />{dateFrom ? format(dateFrom, "dd MMM yy") : "From"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal min-h-[44px]", !dateTo && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />{dateTo ? format(dateTo, "dd MMM yy") : "To"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
               {hasFilters && (
                 <button onClick={clearFilters} className="text-sm text-primary active:underline whitespace-nowrap min-h-[44px] flex items-center">
                   Clear Filters
@@ -301,12 +239,8 @@ const Claims = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Filter Claims</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4">
-                <FilterControls {...filterProps} />
-              </div>
+              <SheetHeader><SheetTitle>Filter Claims</SheetTitle></SheetHeader>
+              <div className="mt-4"><FilterControls {...filterProps} /></div>
             </SheetContent>
           </Sheet>
         </div>
@@ -329,17 +263,32 @@ const Claims = () => {
           </Card>
         )}
 
-        {/* Empty state */}
-        {filtered.length === 0 ? (
+        {/* Loading state */}
+        {isLoading ? (
+          <Card className="shadow-sm">
+            <CardContent className="p-6 space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ) : filtered.length === 0 ? (
           <Card className="shadow-sm">
             <CardContent className="flex flex-col items-center justify-center py-16 md:py-20 gap-4">
               <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
                 <ClipboardList className="h-8 w-8 text-muted-foreground" />
               </div>
-              <p className="text-lg font-medium text-foreground">No claims found</p>
-              <p className="text-sm text-muted-foreground text-center">Try adjusting your filters or create a new claim</p>
+              <p className="text-lg font-medium text-foreground">{claims.length === 0 ? "No claims yet" : "No claims found"}</p>
+              <p className="text-sm text-muted-foreground text-center">
+                {claims.length === 0 ? "Create your first survey claim to get started" : "Try adjusting your filters"}
+              </p>
               <Button onClick={() => navigate("/new-claim")} className="gap-2 mt-2 min-h-[44px]">
-                <Plus className="h-4 w-4" /> Create your first claim
+                <Plus className="h-4 w-4" /> {claims.length === 0 ? "Create your first claim" : "New Claim"}
               </Button>
             </CardContent>
           </Card>
@@ -356,12 +305,10 @@ const Claims = () => {
                       </TableHead>
                       <TableHead>Claim ID</TableHead>
                       <TableHead>Vehicle</TableHead>
-                      <TableHead>Owner Name</TableHead>
                       <TableHead>Insurer</TableHead>
                       <TableHead className="text-right">IDV</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Created</TableHead>
-                      <TableHead>Report</TableHead>
                       <TableHead className="w-[48px]" />
                     </TableRow>
                   </TableHeader>
@@ -375,22 +322,18 @@ const Claims = () => {
                           className="font-mono text-sm text-primary font-medium cursor-pointer active:underline"
                           onClick={() => navigate(`/claims/${claim.id}`)}
                         >
-                          {claim.id}
+                          {claim.id.slice(0, 8)}
                         </TableCell>
-                        <TableCell className="font-medium text-foreground">{claim.vehicle}</TableCell>
-                        <TableCell>{claim.owner}</TableCell>
-                        <TableCell>{claim.insurer}</TableCell>
-                        <TableCell className="text-right font-medium tabular-nums">{formatINR(claim.idv)}</TableCell>
+                        <TableCell className="font-medium text-foreground">{vehicleName(claim)}</TableCell>
+                        <TableCell>{claim.insurer || "—"}</TableCell>
+                        <TableCell className="text-right font-medium tabular-nums">{claim.idv ? formatINR(Number(claim.idv)) : "—"}</TableCell>
                         <TableCell>
-                          <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", statusStyles[claim.status])}>
+                          <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", statusStyles[claim.status] || "")}>
                             {claim.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{claim.created}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", reportStyles[claim.report])}>
-                            {claim.report}
-                          </Badge>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {format(new Date(claim.created_at), "dd MMM yyyy")}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
@@ -424,14 +367,14 @@ const Claims = () => {
                 >
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-sm font-bold text-primary">{claim.id}</span>
-                      <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", statusStyles[claim.status])}>
+                      <span className="font-mono text-sm font-bold text-primary">{claim.id.slice(0, 8)}</span>
+                      <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", statusStyles[claim.status] || "")}>
                         {claim.status}
                       </Badge>
                     </div>
-                    <p className="text-sm font-medium text-foreground">{claim.vehicle}</p>
+                    <p className="text-sm font-medium text-foreground">{vehicleName(claim)}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{claim.created}</span>
+                      <span className="text-xs text-muted-foreground">{format(new Date(claim.created_at), "dd MMM yyyy")}</span>
                       <Button
                         variant="outline"
                         size="sm"
@@ -446,18 +389,6 @@ const Claims = () => {
               ))}
             </div>
           </>
-        )}
-
-        {filtered.length > 0 && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing 1–{filtered.length} of 47 claims
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled className="min-h-[44px]">Previous</Button>
-              <Button variant="outline" size="sm" className="min-h-[44px]">Next</Button>
-            </div>
-          </div>
         )}
       </div>
     </AppLayout>
