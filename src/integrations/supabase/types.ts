@@ -14,7 +14,219 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      claims: {
+        Row: {
+          cause_of_loss: string | null
+          compulsory_excess: number | null
+          created_at: string
+          id: string
+          idv: number | null
+          insurer: string | null
+          loss_date: string | null
+          nil_dep: boolean | null
+          policy_number: string | null
+          registration_number: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          vehicle_make: string | null
+          vehicle_model: string | null
+          vehicle_year: number | null
+          voluntary_excess: number | null
+        }
+        Insert: {
+          cause_of_loss?: string | null
+          compulsory_excess?: number | null
+          created_at?: string
+          id?: string
+          idv?: number | null
+          insurer?: string | null
+          loss_date?: string | null
+          nil_dep?: boolean | null
+          policy_number?: string | null
+          registration_number?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_year?: number | null
+          voluntary_excess?: number | null
+        }
+        Update: {
+          cause_of_loss?: string | null
+          compulsory_excess?: number | null
+          created_at?: string
+          id?: string
+          idv?: number | null
+          insurer?: string | null
+          loss_date?: string | null
+          nil_dep?: boolean | null
+          policy_number?: string | null
+          registration_number?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_year?: number | null
+          voluntary_excess?: number | null
+        }
+        Relationships: []
+      }
+      labour_lines: {
+        Row: {
+          amount: number | null
+          claim_id: string
+          created_at: string
+          description: string | null
+          id: string
+        }
+        Insert: {
+          amount?: number | null
+          claim_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+        }
+        Update: {
+          amount?: number | null
+          claim_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "labour_lines_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parts_lines: {
+        Row: {
+          claim_id: string
+          created_at: string
+          depreciation_pct: number | null
+          id: string
+          net_amount: number | null
+          part_category: string | null
+          part_name: string | null
+          qty: number | null
+          repair_replace: string | null
+          source: string | null
+          unit_rate: number | null
+        }
+        Insert: {
+          claim_id: string
+          created_at?: string
+          depreciation_pct?: number | null
+          id?: string
+          net_amount?: number | null
+          part_category?: string | null
+          part_name?: string | null
+          qty?: number | null
+          repair_replace?: string | null
+          source?: string | null
+          unit_rate?: number | null
+        }
+        Update: {
+          claim_id?: string
+          created_at?: string
+          depreciation_pct?: number | null
+          id?: string
+          net_amount?: number | null
+          part_category?: string | null
+          part_name?: string | null
+          qty?: number | null
+          repair_replace?: string | null
+          source?: string | null
+          unit_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parts_lines_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          captured_at: string | null
+          claim_id: string
+          created_at: string
+          gps_lat: number | null
+          gps_lng: number | null
+          id: string
+          storage_path: string | null
+        }
+        Insert: {
+          captured_at?: string | null
+          claim_id: string
+          created_at?: string
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          storage_path?: string | null
+        }
+        Update: {
+          captured_at?: string | null
+          claim_id?: string
+          created_at?: string
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          storage_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          claims_used: number
+          created_at: string
+          full_name: string | null
+          id: string
+          irdai_license: string | null
+          subscription_tier: string
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          claims_used?: number
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          irdai_license?: string | null
+          subscription_tier?: string
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          claims_used?: number
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          irdai_license?: string | null
+          subscription_tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
