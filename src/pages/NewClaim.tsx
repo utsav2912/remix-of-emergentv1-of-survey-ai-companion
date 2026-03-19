@@ -1,15 +1,14 @@
 import { useState, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { StepIndicator } from "@/components/new-claim/StepIndicator";
-import { VehicleDetailsCard } from "@/components/new-claim/VehicleDetailsCard";
-import { PolicyDetailsCard } from "@/components/new-claim/PolicyDetailsCard";
-import { CauseOfLossCard } from "@/components/new-claim/CauseOfLossCard";
+import { Step1VehiclePolicy } from "@/components/new-claim/Step1VehiclePolicy";
+import { PhotoUploadStep } from "@/components/new-claim/PhotoUploadStep";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const requiredFields: Record<string, string> = {
+const step1RequiredFields: Record<string, string> = {
   regNumber: "Registration Number",
   make: "Make",
   model: "Model",
@@ -26,6 +25,7 @@ const requiredFields: Record<string, string> = {
 
 const NewClaim = () => {
   const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
   const [data, setData] = useState<Record<string, any>>({ voluntaryExcess: "0" });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -41,9 +41,9 @@ const NewClaim = () => {
     });
   }, []);
 
-  const validate = () => {
+  const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
-    for (const [field, label] of Object.entries(requiredFields)) {
+    for (const [field, label] of Object.entries(step1RequiredFields)) {
       const val = data[field];
       if (val === undefined || val === null || val === "") {
         newErrors[field] = `${label} is required`;
@@ -54,11 +54,23 @@ const NewClaim = () => {
   };
 
   const handleNext = () => {
-    if (validate()) {
-      toast.success("Step 1 complete — proceeding to Photos");
-      // Future: navigate to step 2
+    if (currentStep === 1) {
+      if (validateStep1()) {
+        setCurrentStep(2);
+      } else {
+        toast.error("Please fill in all required fields");
+      }
+    } else if (currentStep === 2) {
+      toast.success("Step 2 complete — proceeding to Parts & Damage");
+      // Future: setCurrentStep(3)
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
     } else {
-      toast.error("Please fill in all required fields");
+      navigate("/claims");
     }
   };
 
@@ -66,29 +78,45 @@ const NewClaim = () => {
     toast.success("Draft saved successfully");
   };
 
+  const nextLabel =
+    currentStep === 1
+      ? "Next: Photos"
+      : currentStep === 2
+      ? "Next: Parts & Damage"
+      : currentStep === 3
+      ? "Next: Review"
+      : "Submit";
+
   return (
     <AppLayout title="New Claim">
       <div className="space-y-6 max-w-6xl mx-auto">
-        <StepIndicator currentStep={1} />
+        <StepIndicator currentStep={currentStep} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <VehicleDetailsCard data={data} errors={errors} onChange={handleChange} />
-          <PolicyDetailsCard data={data} errors={errors} onChange={handleChange} />
-        </div>
+        {currentStep === 1 && (
+          <Step1VehiclePolicy data={data} errors={errors} onChange={handleChange} />
+        )}
 
-        <CauseOfLossCard data={data} errors={errors} onChange={handleChange} />
+        {currentStep === 2 && <PhotoUploadStep />}
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 pb-6">
-          <Button variant="ghost" onClick={() => navigate("/claims")}>
-            Cancel
+        <div className="flex items-center justify-between pb-6">
+          <Button variant="ghost" onClick={handleBack} className="gap-2">
+            {currentStep === 1 ? (
+              "Cancel"
+            ) : (
+              <>
+                <ArrowLeft className="h-4 w-4" /> Back
+              </>
+            )}
           </Button>
-          <Button variant="outline" onClick={handleSaveDraft}>
-            Save Draft
-          </Button>
-          <Button onClick={handleNext} className="gap-2">
-            Next: Photos <ArrowRight className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={handleSaveDraft}>
+              Save Draft
+            </Button>
+            <Button onClick={handleNext} className="gap-2">
+              {nextLabel} <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </AppLayout>
