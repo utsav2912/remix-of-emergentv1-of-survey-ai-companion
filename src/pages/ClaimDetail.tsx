@@ -26,15 +26,15 @@ const ClaimDetail = () => {
     <AppLayout title="Claim Detail">
       <div className="max-w-7xl mx-auto space-y-4">
         {/* Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card rounded-lg border p-4">
-          <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex flex-col gap-3 bg-card rounded-lg border p-3 md:p-4">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => navigate("/claims")}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1 text-sm text-muted-foreground active:text-foreground transition-colors min-h-[44px]"
             >
-              <ArrowLeft className="h-4 w-4" /> Back to Claims
+              <ArrowLeft className="h-4 w-4" /> Back
             </button>
-            <span className="text-border">|</span>
+            <span className="text-border hidden md:inline">|</span>
             <span className="font-mono text-sm font-semibold text-foreground">
               SDA/2026/03/0042
             </span>
@@ -44,15 +44,15 @@ const ClaimDetail = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="outline" size="sm" className="gap-1.5 min-h-[44px]">
               <Pencil className="h-3.5 w-3.5" /> Edit
             </Button>
-            <Button size="sm" className="gap-1.5">
-              <FileText className="h-3.5 w-3.5" /> Generate PDF
+            <Button size="sm" className="gap-1.5 min-h-[44px]">
+              <FileText className="h-3.5 w-3.5" /> <span className="hidden md:inline">Generate</span> PDF
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-10 w-10 p-0 min-h-[44px] min-w-[44px]">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -73,13 +73,15 @@ const ClaimDetail = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full justify-start bg-muted/50">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="parts">Parts & Labour</TabsTrigger>
-            <TabsTrigger value="photos">Photos</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <TabsList className="w-max md:w-full justify-start bg-muted/50 flex-nowrap">
+              <TabsTrigger value="overview" className="min-h-[44px]">Overview</TabsTrigger>
+              <TabsTrigger value="parts" className="min-h-[44px] whitespace-nowrap">Parts & Labour</TabsTrigger>
+              <TabsTrigger value="photos" className="min-h-[44px]">Photos</TabsTrigger>
+              <TabsTrigger value="documents" className="min-h-[44px]">Documents</TabsTrigger>
+              <TabsTrigger value="history" className="min-h-[44px]">History</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="overview" className="mt-4">
             <ClaimOverviewTab />

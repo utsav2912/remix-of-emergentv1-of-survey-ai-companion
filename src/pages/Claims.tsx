@@ -31,6 +31,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -46,6 +53,7 @@ import {
   FileDown,
   Download,
   ClipboardList,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -90,6 +98,82 @@ function formatINR(val: number) {
   return "₹" + val.toLocaleString("en-IN");
 }
 
+function FilterControls({
+  search, setSearch, statusFilter, setStatusFilter,
+  insurerFilter, setInsurerFilter, dateFrom, setDateFrom,
+  dateTo, setDateTo, clearFilters, hasFilters,
+}: {
+  search: string; setSearch: (v: string) => void;
+  statusFilter: string; setStatusFilter: (v: string) => void;
+  insurerFilter: string; setInsurerFilter: (v: string) => void;
+  dateFrom?: Date; setDateFrom: (v?: Date) => void;
+  dateTo?: Date; setDateTo: (v?: Date) => void;
+  clearFilters: () => void; hasFilters: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search claims..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9 text-base"
+        />
+      </div>
+      <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <SelectTrigger className="text-base min-h-[44px]"><SelectValue placeholder="Status" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Status</SelectItem>
+          <SelectItem value="Draft">Draft</SelectItem>
+          <SelectItem value="In Review">In Review</SelectItem>
+          <SelectItem value="Final">Final</SelectItem>
+          <SelectItem value="Disputed">Disputed</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select value={insurerFilter} onValueChange={setInsurerFilter}>
+        <SelectTrigger className="text-base min-h-[44px]"><SelectValue placeholder="Insurer" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Insurers</SelectItem>
+          <SelectItem value="New India">New India</SelectItem>
+          <SelectItem value="Oriental">Oriental</SelectItem>
+          <SelectItem value="United India">United India</SelectItem>
+          <SelectItem value="National">National</SelectItem>
+        </SelectContent>
+      </Select>
+      <div className="flex gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal min-h-[44px] text-base", !dateFrom && "text-muted-foreground")}>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateFrom ? format(dateFrom, "dd MMM yy") : "From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal min-h-[44px] text-base", !dateTo && "text-muted-foreground")}>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateTo ? format(dateTo, "dd MMM yy") : "To"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+      </div>
+      {hasFilters && (
+        <Button variant="ghost" onClick={clearFilters} className="w-full text-primary min-h-[44px]">
+          Clear All Filters
+        </Button>
+      )}
+    </div>
+  );
+}
+
 const Claims = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
@@ -99,7 +183,7 @@ const Claims = () => {
   const [dateTo, setDateTo] = useState<Date>();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const hasFilters = search || statusFilter !== "all" || insurerFilter !== "all" || dateFrom || dateTo;
+  const hasFilters = !!(search || statusFilter !== "all" || insurerFilter !== "all" || dateFrom || dateTo);
 
   const filtered = useMemo(() => {
     return mockClaims.filter((c) => {
@@ -124,7 +208,7 @@ const Claims = () => {
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
@@ -137,34 +221,29 @@ const Claims = () => {
     }
   };
 
+  const filterProps = { search, setSearch, statusFilter, setStatusFilter, insurerFilter, setInsurerFilter, dateFrom, setDateFrom, dateTo, setDateTo, clearFilters, hasFilters };
+
   return (
     <AppLayout title="Claims">
-      <div className="space-y-5">
+      <div className="space-y-4 md:space-y-5">
         {/* Page header */}
         <div className="flex items-center justify-between">
           <div />
-          <Button onClick={() => navigate("/new-claim")} className="gap-2">
+          <Button onClick={() => navigate("/new-claim")} className="gap-2 min-h-[44px]">
             <Plus className="h-4 w-4" /> New Claim
           </Button>
         </div>
 
-        {/* Filter bar */}
-        <Card className="shadow-sm">
+        {/* Desktop filter bar */}
+        <Card className="shadow-sm hidden md:block">
           <CardContent className="p-4">
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[220px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by vehicle, claim ID, or policy number..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
-                />
+                <Input placeholder="Search by vehicle, claim ID, or policy number..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 text-base" />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
+                <SelectTrigger className="w-[150px] min-h-[44px]"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="Draft">Draft</SelectItem>
@@ -174,9 +253,7 @@ const Claims = () => {
                 </SelectContent>
               </Select>
               <Select value={insurerFilter} onValueChange={setInsurerFilter}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="Insurer" />
-                </SelectTrigger>
+                <SelectTrigger className="w-[160px] min-h-[44px]"><SelectValue placeholder="Insurer" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Insurers</SelectItem>
                   <SelectItem value="New India">New India</SelectItem>
@@ -185,35 +262,28 @@ const Claims = () => {
                   <SelectItem value="National">National</SelectItem>
                 </SelectContent>
               </Select>
-
-              {/* Date From */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal", !dateFrom && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateFrom ? format(dateFrom, "dd MMM yy") : "From"}
+                  <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal min-h-[44px]", !dateFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />{dateFrom ? format(dateFrom, "dd MMM yy") : "From"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
-
-              {/* Date To */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal", !dateTo && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateTo ? format(dateTo, "dd MMM yy") : "To"}
+                  <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal min-h-[44px]", !dateTo && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />{dateTo ? format(dateTo, "dd MMM yy") : "To"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
-
               {hasFilters && (
-                <button onClick={clearFilters} className="text-sm text-primary hover:underline whitespace-nowrap">
+                <button onClick={clearFilters} className="text-sm text-primary active:underline whitespace-nowrap min-h-[44px] flex items-center">
                   Clear Filters
                 </button>
               )}
@@ -221,121 +291,171 @@ const Claims = () => {
           </CardContent>
         </Card>
 
+        {/* Mobile filter button */}
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="w-full gap-2 min-h-[44px] text-base">
+                <SlidersHorizontal className="h-4 w-4" /> Filters
+                {hasFilters && <Badge variant="secondary" className="ml-1 text-xs">Active</Badge>}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Filter Claims</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <FilterControls {...filterProps} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
         {/* Bulk action bar */}
         {selected.size > 0 && (
           <Card className="shadow-sm border-primary/30 bg-primary/5">
-            <CardContent className="p-3 flex items-center gap-4">
+            <CardContent className="p-3 flex items-center gap-4 flex-wrap">
               <span className="text-sm font-medium text-foreground">{selected.size} selected</span>
-              <span className="text-border">—</span>
-              <Button variant="ghost" size="sm" className="gap-1.5 text-sm text-primary">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-sm text-primary min-h-[44px]">
                 <FileDown className="h-4 w-4" /> Generate Reports
               </Button>
-              <Button variant="ghost" size="sm" className="gap-1.5 text-sm text-primary">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-sm text-primary min-h-[44px]">
                 <Download className="h-4 w-4" /> Export CSV
               </Button>
-              <Button variant="ghost" size="sm" className="gap-1.5 text-sm text-destructive">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-sm text-destructive min-h-[44px]">
                 <Trash2 className="h-4 w-4" /> Delete
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* Table or Empty */}
+        {/* Empty state */}
         {filtered.length === 0 ? (
           <Card className="shadow-sm">
-            <CardContent className="flex flex-col items-center justify-center py-20 gap-4">
+            <CardContent className="flex flex-col items-center justify-center py-16 md:py-20 gap-4">
               <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
                 <ClipboardList className="h-8 w-8 text-muted-foreground" />
               </div>
               <p className="text-lg font-medium text-foreground">No claims found</p>
-              <p className="text-sm text-muted-foreground">Try adjusting your filters or create a new claim</p>
-              <Button onClick={() => navigate("/new-claim")} className="gap-2 mt-2">
+              <p className="text-sm text-muted-foreground text-center">Try adjusting your filters or create a new claim</p>
+              <Button onClick={() => navigate("/new-claim")} className="gap-2 mt-2 min-h-[44px]">
                 <Plus className="h-4 w-4" /> Create your first claim
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <Card className="shadow-sm">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[44px] pl-4">
-                      <Checkbox
-                        checked={selected.size === filtered.length && filtered.length > 0}
-                        onCheckedChange={toggleAll}
-                      />
-                    </TableHead>
-                    <TableHead>Claim ID</TableHead>
-                    <TableHead>Vehicle</TableHead>
-                    <TableHead className="hidden md:table-cell">Owner Name</TableHead>
-                    <TableHead className="hidden lg:table-cell">Insurer</TableHead>
-                    <TableHead className="hidden lg:table-cell text-right">IDV</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="hidden sm:table-cell">Created</TableHead>
-                    <TableHead className="hidden md:table-cell">Report</TableHead>
-                    <TableHead className="w-[48px]" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((claim) => (
-                    <TableRow key={claim.id} className={cn(selected.has(claim.id) && "bg-primary/5")}>
-                      <TableCell className="pl-4">
-                        <Checkbox
-                          checked={selected.has(claim.id)}
-                          onCheckedChange={() => toggleSelect(claim.id)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-mono text-sm text-primary font-medium cursor-pointer hover:underline">
-                        {claim.id}
-                      </TableCell>
-                      <TableCell className="font-medium text-foreground">{claim.vehicle}</TableCell>
-                      <TableCell className="hidden md:table-cell">{claim.owner}</TableCell>
-                      <TableCell className="hidden lg:table-cell">{claim.insurer}</TableCell>
-                      <TableCell className="hidden lg:table-cell text-right font-medium tabular-nums">{formatINR(claim.idv)}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", statusStyles[claim.status])}>
-                          {claim.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">{claim.created}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", reportStyles[claim.report])}>
-                          {claim.report}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="gap-2"><ExternalLink className="h-4 w-4" /> Open</DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Edit</DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2"><FileText className="h-4 w-4" /> Generate PDF</DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 text-destructive"><Trash2 className="h-4 w-4" /> Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+          <>
+            {/* Desktop table */}
+            <Card className="shadow-sm hidden md:block">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[44px] pl-4">
+                        <Checkbox checked={selected.size === filtered.length && filtered.length > 0} onCheckedChange={toggleAll} />
+                      </TableHead>
+                      <TableHead>Claim ID</TableHead>
+                      <TableHead>Vehicle</TableHead>
+                      <TableHead>Owner Name</TableHead>
+                      <TableHead>Insurer</TableHead>
+                      <TableHead className="text-right">IDV</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Report</TableHead>
+                      <TableHead className="w-[48px]" />
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((claim) => (
+                      <TableRow key={claim.id} className={cn(selected.has(claim.id) && "bg-primary/5")}>
+                        <TableCell className="pl-4">
+                          <Checkbox checked={selected.has(claim.id)} onCheckedChange={() => toggleSelect(claim.id)} />
+                        </TableCell>
+                        <TableCell
+                          className="font-mono text-sm text-primary font-medium cursor-pointer active:underline"
+                          onClick={() => navigate(`/claims/${claim.id}`)}
+                        >
+                          {claim.id}
+                        </TableCell>
+                        <TableCell className="font-medium text-foreground">{claim.vehicle}</TableCell>
+                        <TableCell>{claim.owner}</TableCell>
+                        <TableCell>{claim.insurer}</TableCell>
+                        <TableCell className="text-right font-medium tabular-nums">{formatINR(claim.idv)}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", statusStyles[claim.status])}>
+                            {claim.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{claim.created}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", reportStyles[claim.report])}>
+                            {claim.report}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px] min-w-[44px] text-muted-foreground">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem className="gap-2" onClick={() => navigate(`/claims/${claim.id}`)}><ExternalLink className="h-4 w-4" /> Open</DropdownMenuItem>
+                              <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Edit</DropdownMenuItem>
+                              <DropdownMenuItem className="gap-2"><FileText className="h-4 w-4" /> Generate PDF</DropdownMenuItem>
+                              <DropdownMenuItem className="gap-2 text-destructive"><Trash2 className="h-4 w-4" /> Delete</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            {/* Mobile card list */}
+            <div className="md:hidden space-y-3">
+              {filtered.map((claim) => (
+                <Card
+                  key={claim.id}
+                  className="shadow-sm active:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/claims/${claim.id}`)}
+                >
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm font-bold text-primary">{claim.id}</span>
+                      <Badge variant="secondary" className={cn("rounded-sm text-xs font-medium", statusStyles[claim.status])}>
+                        {claim.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm font-medium text-foreground">{claim.vehicle}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{claim.created}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 text-xs min-h-[44px]"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/claims/${claim.id}`); }}
+                      >
+                        Open
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
         )}
 
-        {/* Pagination */}
         {filtered.length > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Showing 1–{filtered.length} of 47 claims
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled>Previous</Button>
-              <Button variant="outline" size="sm">Next</Button>
+              <Button variant="outline" size="sm" disabled className="min-h-[44px]">Previous</Button>
+              <Button variant="outline" size="sm" className="min-h-[44px]">Next</Button>
             </div>
           </div>
         )}
