@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CalendarIcon, FileText, Download, AlertTriangle } from "lucide-react";
+import { CalendarIcon, FileText, Download, AlertTriangle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -27,6 +27,12 @@ export function ReviewSidebar() {
   const [template, setTemplate] = useState("new-india");
   const [reportDate, setReportDate] = useState<Date>(new Date());
   const [refNumber] = useState("SDA/2026/03/0042");
+  const [generating, setGenerating] = useState(false);
+
+  const handleGenerate = () => {
+    setGenerating(true);
+    setTimeout(() => setGenerating(false), 2500);
+  };
 
   return (
     <div className="space-y-5">
@@ -108,8 +114,18 @@ export function ReviewSidebar() {
             size="lg"
             variant="secondary"
             className="w-full gap-2 font-semibold"
+            disabled={generating}
+            onClick={handleGenerate}
           >
-            <Download className="h-4 w-4" /> Generate PDF Report
+            {generating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" /> Generate PDF Report
+              </>
+            )}
           </Button>
           <div className="flex items-center justify-center gap-4 text-xs opacity-70">
             <button className="underline hover:opacity-100">Save as Draft</button>

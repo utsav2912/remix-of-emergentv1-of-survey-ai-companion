@@ -3,18 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Camera, X, MapPin, Info, Loader2, Car } from "lucide-react";
+import { Camera, X, MapPin, Info, Loader2, Car, Upload, RotateCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MockPhoto {
   id: string;
   label: string;
   hasGps: boolean;
+  error?: boolean;
 }
 
 const initialMockPhotos: MockPhoto[] = [
@@ -23,7 +25,7 @@ const initialMockPhotos: MockPhoto[] = [
   { id: "3", label: "Driver side", hasGps: false },
   { id: "4", label: "Dashboard", hasGps: true },
   { id: "5", label: "Damaged panel", hasGps: true },
-  { id: "6", label: "Close-up damage", hasGps: false },
+  { id: "6", label: "Close-up damage", hasGps: false, error: true },
 ];
 
 const checklistItems = [
@@ -46,6 +48,7 @@ export function PhotoUploadStep() {
 
   const completedCount = checkedItems.size;
   const progressPercent = (completedCount / checklistItems.length) * 100;
+  const hasPhotos = photos.length > 0;
 
   const toggleCheck = (index: number) => {
     setCheckedItems((prev) => {
@@ -74,14 +77,14 @@ export function PhotoUploadStep() {
       </Alert>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Upload Area - 2/3 width */}
+        {/* Main Upload Area */}
         <div className="lg:col-span-2 space-y-5">
           {/* Upload Drop Zone */}
           <div
             onClick={handleFileInput}
             className={cn(
               "border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
-              photos.length > 0 ? "py-8" : "py-16"
+              hasPhotos ? "py-8" : "py-16"
             )}
           >
             <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
@@ -89,12 +92,17 @@ export function PhotoUploadStep() {
             </div>
             <div className="text-center">
               <p className="text-sm font-medium text-foreground">
-                Tap to take photos or upload from gallery
+                {hasPhotos ? "Add more photos" : "No photos yet — tap to capture or upload"}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Supports JPG, PNG up to 10MB each
               </p>
             </div>
+            {!hasPhotos && (
+              <Button variant="outline" size="sm" className="gap-1.5 mt-1" onClick={(e) => { e.stopPropagation(); handleFileInput(); }}>
+                <Upload className="h-4 w-4" /> Upload Photos
+              </Button>
+            )}
             <input
               ref={fileInputRef}
               type="file"
@@ -106,23 +114,36 @@ export function PhotoUploadStep() {
           </div>
 
           {/* Photo Grid */}
-          {photos.length > 0 && (
+          {hasPhotos && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
-                  className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gradient-to-br from-muted to-muted/60 cursor-pointer group"
+                  className={cn(
+                    "relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group",
+                    photo.error
+                      ? "bg-destructive/10 border-2 border-destructive/40"
+                      : "bg-gradient-to-br from-muted to-muted/60"
+                  )}
                   onMouseEnter={() => setHoveredPhoto(photo.id)}
                   onMouseLeave={() => setHoveredPhoto(null)}
-                  onClick={() => setLightboxPhoto(photo.id)}
+                  onClick={() => !photo.error && setLightboxPhoto(photo.id)}
                 >
-                  {/* Placeholder car damage icon */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Car className="h-10 w-10 text-muted-foreground/40" />
+                    {photo.error ? (
+                      <div className="text-center space-y-1">
+                        <X className="h-6 w-6 text-destructive mx-auto" />
+                        <p className="text-[10px] text-destructive font-medium">Upload failed</p>
+                        <button className="text-[10px] text-primary flex items-center gap-0.5 mx-auto">
+                          <RotateCw className="h-3 w-3" /> Tap to retry
+                        </button>
+                      </div>
+                    ) : (
+                      <Car className="h-10 w-10 text-muted-foreground/40" />
+                    )}
                   </div>
 
-                  {/* Delete button on hover */}
-                  {hoveredPhoto === photo.id && (
+                  {hoveredPhoto === photo.id && !photo.error && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -134,19 +155,20 @@ export function PhotoUploadStep() {
                     </button>
                   )}
 
-                  {/* Bottom overlay */}
-                  <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-sm px-2.5 py-1.5 flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-white bg-white/20 px-1.5 py-0.5 rounded">
-                      {index + 1}/{photos.length}
-                    </span>
-                    <span className={cn(
-                      "flex items-center gap-1 text-[11px] font-medium",
-                      photo.hasGps ? "text-green-400" : "text-amber-400"
-                    )}>
-                      <MapPin className="h-3 w-3" />
-                      {photo.hasGps ? "GPS ✓" : "No GPS"}
-                    </span>
-                  </div>
+                  {!photo.error && (
+                    <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-sm px-2.5 py-1.5 flex items-center justify-between">
+                      <span className="text-[11px] font-medium text-white bg-white/20 px-1.5 py-0.5 rounded">
+                        {index + 1}/{photos.length}
+                      </span>
+                      <span className={cn(
+                        "flex items-center gap-1 text-[11px] font-medium",
+                        photo.hasGps ? "text-green-400" : "text-amber-400"
+                      )}>
+                        <MapPin className="h-3 w-3" />
+                        {photo.hasGps ? "GPS ✓" : "No GPS"}
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
