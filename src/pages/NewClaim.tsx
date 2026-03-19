@@ -4,6 +4,7 @@ import { StepIndicator } from "@/components/new-claim/StepIndicator";
 import { Step1VehiclePolicy } from "@/components/new-claim/Step1VehiclePolicy";
 import { PhotoUploadStep } from "@/components/new-claim/PhotoUploadStep";
 import { Step3PartsDamage } from "@/components/new-claim/Step3PartsDamage";
+import { Step4ReviewCalculate } from "@/components/new-claim/Step4ReviewCalculate";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -64,8 +65,10 @@ const NewClaim = () => {
     } else if (currentStep === 2) {
       setCurrentStep(3);
     } else if (currentStep === 3) {
-      toast.success("Step 3 complete — proceeding to Review");
-      // Future: setCurrentStep(4)
+      setCurrentStep(4);
+    } else if (currentStep === 4) {
+      toast.success("Claim submitted successfully!");
+      navigate("/claims");
     }
   };
 
@@ -101,6 +104,7 @@ const NewClaim = () => {
 
         {currentStep === 2 && <PhotoUploadStep />}
         {currentStep === 3 && <Step3PartsDamage />}
+        {currentStep === 4 && <Step4ReviewCalculate />}
 
         {/* Footer */}
         <div className="flex items-center justify-between pb-6">
