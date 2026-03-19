@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import Claims from "./pages/Claims";
 import NewClaim from "./pages/NewClaim";
+import ClaimDetail from "./pages/ClaimDetail";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
