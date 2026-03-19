@@ -44,17 +44,20 @@ const initialParts: Part[] = [
 interface PartsTableProps {
   parts: Part[];
   onPartsChange: (parts: Part[]) => void;
+  nilDep?: boolean;
 }
 
-export function PartsTable({ parts, onPartsChange }: PartsTableProps) {
+export function PartsTable({ parts, onPartsChange, nilDep = false }: PartsTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Part | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const fmt = (n: number) =>
     n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 
   const netAmount = (p: Part) =>
-    p.qty * p.unitRate * (1 - p.depreciation / 100);
+    nilDep ? p.qty * p.unitRate : p.qty * p.unitRate * (1 - p.depreciation / 100);
 
   const startEdit = (part: Part) => {
     setEditingId(part.id);
@@ -69,11 +72,14 @@ export function PartsTable({ parts, onPartsChange }: PartsTableProps) {
   const saveEdit = () => {
     if (!editDraft) return;
     onPartsChange(parts.map((p) => (p.id === editDraft.id ? editDraft : p)));
+    setSavedId(editDraft.id);
+    setTimeout(() => setSavedId(null), 1000);
     cancelEdit();
   };
 
-  const deletePart = (id: string) => {
+  const confirmDelete = (id: string) => {
     onPartsChange(parts.filter((p) => p.id !== id));
+    setDeletingId(null);
   };
 
   const addPart = () => {
@@ -89,6 +95,32 @@ export function PartsTable({ parts, onPartsChange }: PartsTableProps) {
     onPartsChange([...parts, newPart]);
     startEdit(newPart);
   };
+
+  // Empty state
+  if (parts.length === 0) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-foreground">Parts Assessment</h3>
+        </div>
+        <div className="border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 py-12">
+          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+            <Plus className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-foreground">No parts added yet</p>
+          <p className="text-xs text-muted-foreground">Add parts manually or let AI suggest from photos</p>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={addPart} className="gap-1.5">
+              <Plus className="h-4 w-4" /> Add Part
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5">
+              <Sparkles className="h-4 w-4" /> Let AI Suggest
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -110,20 +142,24 @@ export function PartsTable({ parts, onPartsChange }: PartsTableProps) {
               <TableHead className="min-w-[110px] text-right">Unit Rate (₹)</TableHead>
               <TableHead className="w-[90px] text-right">Dep. %</TableHead>
               <TableHead className="min-w-[110px] text-right">Net Amt (₹)</TableHead>
-              <TableHead className="w-[80px] text-center">Actions</TableHead>
+              <TableHead className="w-[100px] text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {parts.map((part) => {
               const isEditing = editingId === part.id;
+              const isDeleting = deletingId === part.id;
+              const isSaved = savedId === part.id;
               const draft = isEditing ? editDraft! : part;
 
               return (
                 <TableRow
                   key={part.id}
                   className={cn(
+                    "transition-colors duration-500",
                     part.action === "Replace" && !isEditing && "bg-destructive/5",
-                    isEditing && "bg-primary/5"
+                    isEditing && "bg-primary/5",
+                    isSaved && "bg-[hsl(var(--success))]/10"
                   )}
                 >
                   <TableCell>
@@ -205,16 +241,25 @@ export function PartsTable({ parts, onPartsChange }: PartsTableProps) {
                         value={draft.depreciation}
                         onChange={(e) => setEditDraft({ ...draft, depreciation: Number(e.target.value) })}
                         className="h-8 text-sm text-right w-20"
+                        disabled={nilDep}
                       />
                     ) : (
-                      <span className="text-sm">{part.depreciation}%</span>
+                      <span className={cn("text-sm", nilDep && "line-through text-muted-foreground")}>
+                        {part.depreciation}%
+                      </span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
                     <span className="text-sm font-semibold">₹{fmt(netAmount(isEditing ? draft : part))}</span>
                   </TableCell>
                   <TableCell className="text-center">
-                    {isEditing ? (
+                    {isDeleting ? (
+                      <div className="flex items-center justify-center gap-1 text-xs">
+                        <span className="text-destructive">Delete?</span>
+                        <button onClick={() => confirmDelete(part.id)} className="text-destructive font-medium hover:underline">Yes</button>
+                        <button onClick={() => setDeletingId(null)} className="text-muted-foreground hover:underline">Cancel</button>
+                      </div>
+                    ) : isEditing ? (
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={saveEdit} className="p-1 rounded hover:bg-primary/10 text-primary"><Check className="h-4 w-4" /></button>
                         <button onClick={cancelEdit} className="p-1 rounded hover:bg-destructive/10 text-destructive"><X className="h-4 w-4" /></button>
@@ -222,7 +267,7 @@ export function PartsTable({ parts, onPartsChange }: PartsTableProps) {
                     ) : (
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => startEdit(part)} className="p-1 rounded hover:bg-muted text-muted-foreground"><Pencil className="h-3.5 w-3.5" /></button>
-                        <button onClick={() => deletePart(part.id)} className="p-1 rounded hover:bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                        <button onClick={() => setDeletingId(part.id)} className="p-1 rounded hover:bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                       </div>
                     )}
                   </TableCell>
