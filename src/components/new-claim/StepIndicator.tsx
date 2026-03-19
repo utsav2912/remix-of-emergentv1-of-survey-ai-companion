@@ -14,7 +14,7 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
   return (
-    <div className="flex items-center justify-center gap-0 py-6">
+    <div className="flex items-center justify-center gap-0 py-4 md:py-6">
       {steps.map((step, i) => {
         const isCompleted = step.number < currentStep;
         const isActive = step.number === currentStep;
@@ -25,7 +25,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
             <div className="flex items-center gap-2">
               <div
                 className={cn(
-                  "h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 transition-colors",
+                  "h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 transition-colors min-h-[32px] min-w-[32px]",
                   isCompleted && "bg-primary text-primary-foreground",
                   isActive && "bg-primary text-primary-foreground",
                   isFuture && "bg-muted text-muted-foreground"
@@ -35,7 +35,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
               </div>
               <span
                 className={cn(
-                  "text-sm whitespace-nowrap hidden sm:inline",
+                  "text-sm whitespace-nowrap hidden md:inline",
                   isActive && "font-bold text-foreground",
                   isCompleted && "font-medium text-foreground",
                   isFuture && "text-muted-foreground"
@@ -47,7 +47,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
             {i < steps.length - 1 && (
               <div
                 className={cn(
-                  "w-8 md:w-16 h-px mx-2",
+                  "w-6 md:w-16 h-px mx-1.5 md:mx-2",
                   step.number < currentStep ? "bg-primary" : "bg-border"
                 )}
               />
