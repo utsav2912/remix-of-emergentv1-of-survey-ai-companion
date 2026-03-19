@@ -65,8 +65,10 @@ const NewClaim = () => {
     } else if (currentStep === 2) {
       setCurrentStep(3);
     } else if (currentStep === 3) {
-      toast.success("Step 3 complete — proceeding to Review");
-      // Future: setCurrentStep(4)
+      setCurrentStep(4);
+    } else if (currentStep === 4) {
+      toast.success("Claim submitted successfully!");
+      navigate("/claims");
     }
   };
 
