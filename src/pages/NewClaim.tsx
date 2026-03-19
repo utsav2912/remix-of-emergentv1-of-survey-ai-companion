@@ -100,6 +100,7 @@ const NewClaim = () => {
         )}
 
         {currentStep === 2 && <PhotoUploadStep />}
+        {currentStep === 3 && <Step3PartsDamage />}
 
         {/* Footer */}
         <div className="flex items-center justify-between pb-6">
