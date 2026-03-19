@@ -9,6 +9,9 @@ import NewClaim from "./pages/NewClaim";
 import ClaimDetail from "./pages/ClaimDetail";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
