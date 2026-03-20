@@ -28,6 +28,16 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { user, profile } = useAuth();
+
+  const displayName = profile?.full_name || user?.email || "User";
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const isPro = profile?.subscription_tier === "pro";
 
   return (
     <Sidebar collapsible="icon" className="border-none">
