@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +38,7 @@ const experienceOptions = ["<1 year", "1-3 years", "3-5 years", "5-10 years", "1
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { user, profile, loading, refreshProfile } = useAuth();
   const [step, setStep] = useState(1);
   const [license, setLicense] = useState("");
   const [experience, setExperience] = useState("");
@@ -173,7 +176,20 @@ const Onboarding = () => {
                 </p>
               </div>
 
-              <Button onClick={() => navigate("/")} className="w-full" size="lg">
+              <Button
+                onClick={async () => {
+                  if (user) {
+                    await supabase
+                      .from("profiles")
+                      .update({ onboarding_complete: true, irdai_license: license, city } as any)
+                      .eq("user_id", user.id);
+                    await refreshProfile();
+                  }
+                  navigate("/dashboard");
+                }}
+                className="w-full"
+                size="lg"
+              >
                 Go to Dashboard
               </Button>
 

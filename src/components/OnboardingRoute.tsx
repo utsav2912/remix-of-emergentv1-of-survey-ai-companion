@@ -2,7 +2,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+/** Guard for /onboarding — redirects to dashboard if already onboarded */
+export function OnboardingRoute({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useAuth();
 
   if (loading) {
@@ -17,9 +18,8 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  // If profile loaded and onboarding not complete, redirect to onboarding
-  if (profile && !profile.onboarding_complete) {
-    return <Navigate to="/onboarding" replace />;
+  if (profile?.onboarding_complete) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

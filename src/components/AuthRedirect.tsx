@@ -2,7 +2,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+/** Redirects authenticated users away from login/signup pages */
+export function AuthRedirect({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useAuth();
 
   if (loading) {
@@ -13,12 +14,10 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // If profile loaded and onboarding not complete, redirect to onboarding
-  if (profile && !profile.onboarding_complete) {
+  if (user) {
+    if (profile?.onboarding_complete) {
+      return <Navigate to="/dashboard" replace />;
+    }
     return <Navigate to="/onboarding" replace />;
   }
 

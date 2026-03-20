@@ -202,6 +202,7 @@ export type Database = {
           full_name: string | null
           id: string
           irdai_license: string | null
+          onboarding_complete: boolean
           subscription_tier: string
           user_id: string
         }
@@ -212,6 +213,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           irdai_license?: string | null
+          onboarding_complete?: boolean
           subscription_tier?: string
           user_id: string
         }
@@ -222,6 +224,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           irdai_license?: string | null
+          onboarding_complete?: boolean
           subscription_tier?: string
           user_id?: string
         }

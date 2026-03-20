@@ -24,20 +24,30 @@ const Login = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast.error(error.message);
     } else {
       toast.success("Signed in successfully");
-      navigate("/dashboard");
+      // Check onboarding status to route correctly
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("onboarding_complete")
+        .eq("user_id", data.user.id)
+        .single();
+      if (profileData?.onboarding_complete) {
+        navigate("/dashboard");
+      } else {
+        navigate("/onboarding");
+      }
     }
   };
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/dashboard",
+      redirect_uri: window.location.origin + "/onboarding",
     });
     if (result.error) {
       toast.error("Google sign-in failed");
