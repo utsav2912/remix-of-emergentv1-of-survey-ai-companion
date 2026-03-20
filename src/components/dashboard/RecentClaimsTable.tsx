@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import {
   Table,
   TableBody,
@@ -44,8 +45,14 @@ export function RecentClaimsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {claims.map((claim) => (
-              <TableRow key={claim.id}>
+            {claims.map((claim, i) => (
+              <motion.tr
+                key={claim.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + i * 0.06, duration: 0.35 }}
+                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
                 <TableCell className="pl-6 font-medium text-foreground">{claim.id}</TableCell>
                 <TableCell>{claim.vehicle}</TableCell>
                 <TableCell className="hidden md:table-cell">{claim.insurer}</TableCell>
@@ -60,7 +67,7 @@ export function RecentClaimsTable() {
                     Open
                   </Button>
                 </TableCell>
-              </TableRow>
+              </motion.tr>
             ))}
           </TableBody>
         </Table>

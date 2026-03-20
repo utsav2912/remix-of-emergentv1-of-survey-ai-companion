@@ -50,7 +50,7 @@ const HowItWorks = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-20 md:py-28" style={{ background: "#0A1628" }}>
+    <section ref={sectionRef} className="py-20 md:py-28" style={{ background: "#080B14" }}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-14">
           <h2 className="text-3xl font-bold text-white">How It Works</h2>
@@ -63,10 +63,20 @@ const HowItWorks = () => {
           {steps.map((step, i) => (
             <div
               key={step.title}
-              className="step-card relative rounded-2xl p-6 space-y-4"
+              className="step-card relative rounded-2xl p-6 space-y-4 transition-all duration-300"
               style={{
                 background: "rgba(255,255,255,0.04)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
                 border: "1px solid rgba(255,255,255,0.08)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.16)";
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
               }}
             >
               <div className="flex items-center gap-3">

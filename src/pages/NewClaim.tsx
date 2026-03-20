@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { StepIndicator } from "@/components/new-claim/StepIndicator";
 import { Step1VehiclePolicy } from "@/components/new-claim/Step1VehiclePolicy";
@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 const step1RequiredFields: Record<string, string> = {
   regNumber: "Registration Number",
@@ -34,6 +35,7 @@ const NewClaim = () => {
   const [data, setData] = useState<Record<string, any>>({ voluntaryExcess: "0" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const directionRef = useRef(1); // 1 = forward, -1 = back
 
   const handleChange = useCallback((field: string, value: any) => {
     setData((prev) => ({ ...prev, [field]: value }));
@@ -89,6 +91,7 @@ const NewClaim = () => {
   };
 
   const handleNext = () => {
+    directionRef.current = 1;
     if (currentStep === 1) {
       if (validateStep1()) setCurrentStep(2);
       else toast.error("Please fill in all required fields");
@@ -102,6 +105,7 @@ const NewClaim = () => {
   };
 
   const handleBack = () => {
+    directionRef.current = -1;
     if (currentStep > 1) setCurrentStep(currentStep - 1);
     else navigate("/claims");
   };
@@ -135,25 +139,49 @@ const NewClaim = () => {
     : currentStep === 3 ? "Next: Review"
     : "Submit";
 
+  const slideVariants = {
+    enter: (dir: number) => ({ x: dir * 60, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir * -60, opacity: 0 }),
+  };
+
   return (
     <AppLayout title="New Claim">
       <div className="space-y-6 max-w-6xl mx-auto">
         <StepIndicator currentStep={currentStep} />
 
-        {currentStep === 1 && <Step1VehiclePolicy data={data} errors={errors} onChange={handleChange} />}
-        {currentStep === 2 && <PhotoUploadStep />}
-        {currentStep === 3 && <Step3PartsDamage />}
-        {currentStep === 4 && <Step4ReviewCalculate />}
+        <AnimatePresence mode="wait" custom={directionRef.current}>
+          <motion.div
+            key={currentStep}
+            custom={directionRef.current}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            {currentStep === 1 && <Step1VehiclePolicy data={data} errors={errors} onChange={handleChange} />}
+            {currentStep === 2 && <PhotoUploadStep />}
+            {currentStep === 3 && <Step3PartsDamage />}
+            {currentStep === 4 && <Step4ReviewCalculate />}
+          </motion.div>
+        </AnimatePresence>
 
         <div className="flex items-center justify-between pb-6">
-          <Button variant="ghost" onClick={handleBack} className="gap-2">
-            {currentStep === 1 ? "Cancel" : <><ArrowLeft className="h-4 w-4" /> Back</>}
-          </Button>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleSaveDraft}>Save Draft</Button>
-            <Button onClick={handleNext} className="gap-2" disabled={submitting}>
-              {submitting ? <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Submitting...</> : <>{nextLabel} <ArrowRight className="h-4 w-4" /></>}
+          <motion.div whileTap={{ scale: 0.97 }}>
+            <Button variant="ghost" onClick={handleBack} className="gap-2">
+              {currentStep === 1 ? "Cancel" : <><ArrowLeft className="h-4 w-4" /> Back</>}
             </Button>
+          </motion.div>
+          <div className="flex items-center gap-3">
+            <motion.div whileTap={{ scale: 0.97 }}>
+              <Button variant="outline" onClick={handleSaveDraft}>Save Draft</Button>
+            </motion.div>
+            <motion.div whileTap={{ scale: 0.97 }}>
+              <Button onClick={handleNext} className="gap-2" disabled={submitting}>
+                {submitting ? <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Submitting...</> : <>{nextLabel} <ArrowRight className="h-4 w-4" /></>}
+              </Button>
+            </motion.div>
           </div>
         </div>
       </div>
