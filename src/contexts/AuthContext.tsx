@@ -9,6 +9,8 @@ interface Profile {
   irdai_license: string | null;
   city: string | null;
   claims_used: number;
+  role: string;
+  default_mode: string;
 }
 
 interface AuthContextType {
