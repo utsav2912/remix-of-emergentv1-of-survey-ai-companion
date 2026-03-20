@@ -137,10 +137,10 @@ export function PolicyDetailsCard({ data, errors, onChange }: PolicyDetailsCardP
           {errors.policyEnd && <p className="text-xs text-destructive">{errors.policyEnd}</p>}
         </div>
 
-        {/* NIL Depreciation Rider */}
+        {/* Zero Depreciation Add-on */}
         <div className="flex items-center justify-between rounded-md border border-border p-3">
           <div className="space-y-0.5">
-            <Label className="text-sm font-medium">Zero Dep / NIL Dep policy</Label>
+            <Label className="text-sm font-medium">Zero Depreciation Add-on (Nil Dep)</Label>
             <p className="text-xs text-muted-foreground">Policy covers parts without depreciation deduction</p>
           </div>
           <Switch
