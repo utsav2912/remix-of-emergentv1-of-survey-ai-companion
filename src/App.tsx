@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AuthRedirect } from "@/components/AuthRedirect";
 import { OnboardingRoute } from "@/components/OnboardingRoute";
+import { RouteLoadingBar } from "@/components/RouteLoadingBar";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Claims from "./pages/Claims";
@@ -28,6 +29,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <RouteLoadingBar />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<AuthRedirect><Login /></AuthRedirect>} />

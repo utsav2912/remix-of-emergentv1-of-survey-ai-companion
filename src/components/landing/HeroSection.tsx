@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Play } from "lucide-react";
 
 const HeroSection = () => {
@@ -12,7 +11,6 @@ const HeroSection = () => {
   const shapesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Animate floating shapes
     if (shapesRef.current) {
       const shapes = shapesRef.current.querySelectorAll(".geo-shape");
       shapes.forEach((shape, i) => {
@@ -28,7 +26,6 @@ const HeroSection = () => {
       });
     }
 
-    // GSAP text reveal
     if (h1Ref.current) {
       const words = h1Ref.current.querySelectorAll(".word");
       gsap.fromTo(
@@ -43,10 +40,47 @@ const HeroSection = () => {
     <section
       ref={heroRef}
       className="relative min-h-screen flex items-center overflow-hidden pt-16"
-      style={{
-        background: "radial-gradient(ellipse at 30% 50%, #0F2D4A 0%, #0A1628 60%, #060D18 100%)",
-      }}
+      style={{ background: "#080B14" }}
     >
+      {/* Animated gradient mesh blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute rounded-full animate-blob-float"
+          style={{
+            width: 600, height: 600,
+            background: "radial-gradient(circle, #4F46E5 0%, #7C3AED 60%, transparent 100%)",
+            top: -100, left: -100,
+            filter: "blur(80px)",
+            opacity: 0.55,
+            animationDuration: "18s",
+          }}
+        />
+        <div
+          className="absolute rounded-full animate-blob-float"
+          style={{
+            width: 500, height: 500,
+            background: "radial-gradient(circle, #EC4899 0%, #BE185D 60%, transparent 100%)",
+            top: 100, right: -80,
+            filter: "blur(80px)",
+            opacity: 0.55,
+            animationDuration: "22s",
+            animationDelay: "-8s",
+          }}
+        />
+        <div
+          className="absolute rounded-full animate-blob-float"
+          style={{
+            width: 400, height: 400,
+            background: "radial-gradient(circle, #2563EB 0%, #1D4ED8 60%, transparent 100%)",
+            bottom: -50, left: "30%",
+            filter: "blur(80px)",
+            opacity: 0.55,
+            animationDuration: "20s",
+            animationDelay: "-4s",
+          }}
+        />
+      </div>
+
       {/* Noise texture overlay */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none animate-noise"
         style={{
@@ -78,7 +112,8 @@ const HeroSection = () => {
               style={{
                 background: "rgba(255,255,255,0.06)",
                 border: "1px solid rgba(255,255,255,0.15)",
-                backdropFilter: "blur(8px)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
               }}
             >
               Built for Indian Motor Surveyors · IRDAI Compliant
@@ -91,7 +126,12 @@ const HeroSection = () => {
             <span className="word inline-block mr-2">Done</span>
             <span className="word inline-block mr-2">in</span>
             <span
-              className="word inline-block bg-gradient-to-br from-blue-400 to-indigo-400 bg-clip-text text-transparent"
+              className="word inline-block"
+              style={{
+                background: "linear-gradient(135deg, #60A5FA, #818CF8)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
             >
               15&nbsp;Minutes.
             </span>
@@ -116,7 +156,11 @@ const HeroSection = () => {
             <Link to="/signup">
               <Button
                 size="lg"
-                className="h-12 px-8 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white border-0 text-base shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_40px_rgba(99,102,241,0.6)] transition-shadow"
+                className="h-12 px-8 rounded-xl text-white border-0 text-base transition-shadow"
+                style={{
+                  background: "linear-gradient(135deg, #3B82F6, #6366F1)",
+                  boxShadow: "0 0 30px rgba(99,102,241,0.4)",
+                }}
               >
                 Start Free Trial
               </Button>
@@ -124,7 +168,15 @@ const HeroSection = () => {
             <Button
               size="lg"
               variant="outline"
-              className="h-12 px-8 rounded-xl border-white/25 text-white bg-transparent hover:bg-white/[0.06] text-base"
+              className="h-12 px-8 rounded-xl text-white text-base transition-all duration-300"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(255,255,255,0.20)",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.10)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
             >
               <Play className="h-4 w-4 mr-1" /> Watch Demo
             </Button>
@@ -152,8 +204,11 @@ const HeroSection = () => {
               className="rounded-2xl p-6 space-y-5"
               style={{
                 background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                backdropFilter: "blur(12px)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                borderRadius: 16,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
               }}
             >
               <div className="flex items-center justify-between">
