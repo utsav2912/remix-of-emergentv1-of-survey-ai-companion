@@ -118,6 +118,37 @@ export function PolicyDetailsCard({ data, errors, onChange }: PolicyDetailsCardP
         <CardTitle className="text-lg">Policy Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Policy Document Upload */}
+        <div className="space-y-2">
+          <Label>Upload Policy Document</Label>
+          <div
+            onClick={() => policyFileRef.current?.click()}
+            className="border-2 border-dashed border-border rounded-lg flex items-center justify-center gap-2 py-5 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+          >
+            <Upload className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">Click to upload policy PDF</span>
+            <input
+              ref={policyFileRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              className="hidden"
+              onChange={handlePolicyUpload}
+            />
+          </div>
+          {detecting && (
+            <div className="flex items-center gap-2 text-sm text-primary bg-primary/5 border border-primary/20 rounded-md px-3 py-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Reading policy document...</span>
+            </div>
+          )}
+          {detectionStatus === 'unknown' && !detecting && (
+            <div className="flex items-center gap-2 text-sm text-warning bg-warning/10 border border-warning/20 rounded-md px-3 py-2">
+              <AlertTriangle className="h-4 w-4" />
+              <span>Could not detect insurer automatically. Please select from the dropdown.</span>
+            </div>
+          )}
+        </div>
+
         {/* Policy Number */}
         <div className="space-y-1.5">
           <RequiredLabel>Policy Number</RequiredLabel>
