@@ -39,6 +39,28 @@ interface PolicyDetailsCardProps {
   onChange: (field: string, value: any) => void;
 }
 
+const detectInsurer = (filename: string) => {
+  const name = filename.toLowerCase();
+  if (name.includes('oriental') || name.includes('oi')) return 'Oriental Insurance';
+  if (name.includes('new india') || name.includes('nia')) return 'New India Assurance';
+  if (name.includes('united') || name.includes('uii')) return 'United India';
+  if (name.includes('national') || name.includes('nic')) return 'National Insurance';
+  if (name.includes('icici')) return 'ICICI Lombard';
+  if (name.includes('hdfc')) return 'HDFC Ergo';
+  if (name.includes('bajaj')) return 'Bajaj Allianz';
+  return 'Unknown';
+};
+
+const mockPolicyData: Record<string, { policyNumber: string; idv: string }> = {
+  'Oriental Insurance': { policyNumber: '311500/31/2026/000123', idv: '420000' },
+  'New India Assurance': { policyNumber: '11010031250001234', idv: '520000' },
+  'United India': { policyNumber: '1504003125000567', idv: '385000' },
+  'National Insurance': { policyNumber: '210100312500089', idv: '450000' },
+  'ICICI Lombard': { policyNumber: '4001/00/21/P/000456', idv: '510000' },
+  'HDFC Ergo': { policyNumber: 'HDFC/2026/MOT/007890', idv: '475000' },
+  'Bajaj Allianz': { policyNumber: 'OG-26-2801-1803-00001234', idv: '395000' },
+};
+
 function RequiredLabel({ children }: { children: React.ReactNode }) {
   return (
     <Label>
@@ -48,6 +70,48 @@ function RequiredLabel({ children }: { children: React.ReactNode }) {
 }
 
 export function PolicyDetailsCard({ data, errors, onChange }: PolicyDetailsCardProps) {
+  const [detecting, setDetecting] = useState(false);
+  const [detectionStatus, setDetectionStatus] = useState<'idle' | 'success' | 'unknown'>('idle');
+  const policyFileRef = useRef<HTMLInputElement>(null);
+  const insurerFieldRef = useRef<HTMLDivElement>(null);
+
+  const handlePolicyUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setDetecting(true);
+    setDetectionStatus('idle');
+
+    setTimeout(() => {
+      const insurer = detectInsurer(file.name);
+      setDetecting(false);
+
+      if (insurer === 'Unknown') {
+        setDetectionStatus('unknown');
+        toast.warning("Could not detect insurer automatically. Please select from the dropdown.");
+      } else {
+        setDetectionStatus('success');
+        const mock = mockPolicyData[insurer];
+        if (!data.insurer) onChange("insurer", insurer);
+        if (!data.policyNumber && mock) onChange("policyNumber", mock.policyNumber);
+        if (!data.idv && mock) onChange("idv", mock.idv);
+
+        const fmt = (n: string) => Number(n).toLocaleString("en-IN");
+        toast.success(
+          `Policy detected: ${insurer} · Policy No. ${mock?.policyNumber} · IDV ₹${fmt(mock?.idv || '0')}`,
+          {
+            action: {
+              label: "Edit",
+              onClick: () => insurerFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+            },
+          }
+        );
+      }
+    }, 2000);
+
+    // Reset file input
+    e.target.value = '';
+  };
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-4">
