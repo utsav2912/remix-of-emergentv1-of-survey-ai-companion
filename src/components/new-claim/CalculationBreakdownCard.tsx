@@ -107,7 +107,7 @@ export function CalculationBreakdownCard() {
             ["Net Parts Value", `₹${fmt(netParts)}`],
             ["Labour Charges", `₹${fmt(labour)}`],
             ["Subtotal", `₹${fmt(subtotal)}`],
-            ["Less: Compulsory Excess", `−₹${fmt(compExcess)}`],
+            ["Less: Compulsory Excess (as per policy)", `−₹${fmt(compExcess)}`],
             ["Taxable Amount", `₹${fmt(taxable)}`],
             ["GST (18%)", `+₹${fmt(gst)}`],
           ].map(([label, value]) => (
