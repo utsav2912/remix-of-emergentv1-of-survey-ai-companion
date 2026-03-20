@@ -162,7 +162,7 @@ export function PolicyDetailsCard({ data, errors, onChange }: PolicyDetailsCardP
         </div>
 
         {/* Insurer */}
-        <div className="space-y-1.5">
+        <div ref={insurerFieldRef} className="space-y-1.5">
           <RequiredLabel>Insurer</RequiredLabel>
           <Select value={data.insurer || ""} onValueChange={(v) => onChange("insurer", v)}>
             <SelectTrigger className={cn(errors.insurer && "border-destructive")}>

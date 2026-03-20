@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, FileText, Eye } from "lucide-react";
+import { Upload, FileText, Eye, Loader2, AlertTriangle, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 interface Doc {
   id: string;
@@ -33,10 +34,52 @@ const ocrColors: Record<string, string> = {
   Failed: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
+const detectInsurer = (filename: string) => {
+  const name = filename.toLowerCase();
+  if (name.includes('oriental') || name.includes('oi')) return 'Oriental Insurance';
+  if (name.includes('new india') || name.includes('nia')) return 'New India Assurance';
+  if (name.includes('united') || name.includes('uii')) return 'United India';
+  if (name.includes('national') || name.includes('nic')) return 'National Insurance';
+  if (name.includes('icici')) return 'ICICI Lombard';
+  if (name.includes('hdfc')) return 'HDFC Ergo';
+  if (name.includes('bajaj')) return 'Bajaj Allianz';
+  return 'Unknown';
+};
+
+const mockPolicyData: Record<string, { policyNumber: string; idv: string }> = {
+  'Oriental Insurance': { policyNumber: '311500/31/2026/000123', idv: '420000' },
+  'New India Assurance': { policyNumber: '11010031250001234', idv: '520000' },
+  'United India': { policyNumber: '1504003125000567', idv: '385000' },
+  'National Insurance': { policyNumber: '210100312500089', idv: '450000' },
+  'ICICI Lombard': { policyNumber: '4001/00/21/P/000456', idv: '510000' },
+  'HDFC Ergo': { policyNumber: 'HDFC/2026/MOT/007890', idv: '475000' },
+  'Bajaj Allianz': { policyNumber: 'OG-26-2801-1803-00001234', idv: '395000' },
+};
+
 export function ClaimDocumentsTab() {
   const [docs] = useState(mockDocs);
   const [uploadType, setUploadType] = useState("Policy Document");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [detectingId, setDetectingId] = useState<string | null>(null);
+
+  const handleAutoFill = (doc: Doc) => {
+    setDetectingId(doc.id);
+
+    setTimeout(() => {
+      const insurer = detectInsurer(doc.filename);
+      setDetectingId(null);
+
+      if (insurer === 'Unknown') {
+        toast.warning("Could not detect insurer automatically. Please select manually.");
+      } else {
+        const mock = mockPolicyData[insurer];
+        const fmt = (n: string) => Number(n).toLocaleString("en-IN");
+        toast.success(
+          `Policy detected: ${insurer} · Policy No. ${mock?.policyNumber} · IDV ₹${fmt(mock?.idv || '0')}`
+        );
+      }
+    }, 2000);
+  };
 
   return (
     <div className="space-y-6">
@@ -96,6 +139,21 @@ export function ClaimDocumentsTab() {
                   <Badge variant="outline" className={`text-xs ${ocrColors[doc.ocrStatus]}`}>
                     {doc.ocrStatus}
                   </Badge>
+                  {doc.type === "Policy Document" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 text-xs"
+                      disabled={detectingId === doc.id}
+                      onClick={() => handleAutoFill(doc)}
+                    >
+                      {detectingId === doc.id ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Detecting...</>
+                      ) : (
+                        <><Sparkles className="h-3.5 w-3.5" /> Auto-Fill</>
+                      )}
+                    </Button>
+                  )}
                   <Button variant="ghost" size="sm" className="gap-1 text-xs">
                     <Eye className="h-3.5 w-3.5" /> View
                   </Button>
