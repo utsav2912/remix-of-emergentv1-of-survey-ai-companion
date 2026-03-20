@@ -85,16 +85,21 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9 shrink-0">
             <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground text-sm font-semibold">
-              RS
+              {initials}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-medium text-sidebar-foreground truncate">
-                Rajesh Sharma
+                {displayName}
               </span>
-              <Badge className="mt-0.5 w-fit bg-primary text-primary-foreground text-[10px] px-1.5 py-0 rounded-sm">
-                Pro Plan
+              {user?.email && (
+                <span className="text-[11px] text-sidebar-muted truncate">{user.email}</span>
+              )}
+              <Badge className={`mt-0.5 w-fit text-[10px] px-1.5 py-0 rounded-sm ${
+                isPro ? "bg-primary text-primary-foreground" : "bg-sidebar-accent text-sidebar-muted"
+              }`}>
+                {isPro ? "Pro" : "Free Trial"}
               </Badge>
             </div>
           )}

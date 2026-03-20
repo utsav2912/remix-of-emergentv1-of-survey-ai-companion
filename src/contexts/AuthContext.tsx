@@ -2,12 +2,22 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Profile {
+  full_name: string | null;
+  subscription_tier: string;
+  onboarding_complete: boolean;
+  irdai_license: string | null;
+  city: string | null;
+  claims_used: number;
+}
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
-  profile: { full_name: string; subscription_tier: string } | null;
+  profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -16,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   signOut: async () => {},
+  refreshProfile: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -23,15 +34,24 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<{ full_name: string; subscription_tier: string } | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, subscription_tier, onboarding_complete, irdai_license, city, claims_used")
+      .eq("user_id", userId)
+      .single();
+    if (data) setProfile(data as Profile);
+  };
+
   useEffect(() => {
+    // Set up listener BEFORE getSession per Supabase best practices
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        // Defer profile fetch to avoid Supabase deadlock
         setTimeout(() => fetchProfile(session.user.id), 0);
       } else {
         setProfile(null);
@@ -51,13 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, subscription_tier")
-      .eq("user_id", userId)
-      .single();
-    if (data) setProfile(data);
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
   };
 
   const signOut = async () => {
@@ -68,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
