@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           id: string
           idv: number | null
+          ila_id: string | null
           insurer: string | null
           loss_date: string | null
           nil_dep: boolean | null
@@ -40,6 +41,7 @@ export type Database = {
           created_at?: string
           id?: string
           idv?: number | null
+          ila_id?: string | null
           insurer?: string | null
           loss_date?: string | null
           nil_dep?: boolean | null
@@ -59,6 +61,7 @@ export type Database = {
           created_at?: string
           id?: string
           idv?: number | null
+          ila_id?: string | null
           insurer?: string | null
           loss_date?: string | null
           nil_dep?: boolean | null
@@ -71,6 +74,77 @@ export type Database = {
           vehicle_model?: string | null
           vehicle_year?: number | null
           voluntary_excess?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_ila_id_fkey"
+            columns: ["ila_id"]
+            isOneToOne: false
+            referencedRelation: "ila_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ila_submissions: {
+        Row: {
+          cause_of_loss: string
+          claim_ref_no: string
+          created_at: string
+          id: string
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          preliminary_estimate: number | null
+          registration_number: string
+          scene_notes: string | null
+          status: string
+          survey_datetime: string
+          towing_amount: number | null
+          towing_company: string | null
+          towing_required: boolean | null
+          user_id: string
+          vehicle_driveable: string
+          visible_damage: string[] | null
+        }
+        Insert: {
+          cause_of_loss: string
+          claim_ref_no: string
+          created_at?: string
+          id?: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          preliminary_estimate?: number | null
+          registration_number: string
+          scene_notes?: string | null
+          status?: string
+          survey_datetime?: string
+          towing_amount?: number | null
+          towing_company?: string | null
+          towing_required?: boolean | null
+          user_id: string
+          vehicle_driveable: string
+          visible_damage?: string[] | null
+        }
+        Update: {
+          cause_of_loss?: string
+          claim_ref_no?: string
+          created_at?: string
+          id?: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          preliminary_estimate?: number | null
+          registration_number?: string
+          scene_notes?: string | null
+          status?: string
+          survey_datetime?: string
+          towing_amount?: number | null
+          towing_company?: string | null
+          towing_required?: boolean | null
+          user_id?: string
+          vehicle_driveable?: string
+          visible_damage?: string[] | null
         }
         Relationships: []
       }
