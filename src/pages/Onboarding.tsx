@@ -38,6 +38,7 @@ const experienceOptions = ["<1 year", "1-3 years", "3-5 years", "5-10 years", "1
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { user, profile, loading, refreshProfile } = useAuth();
   const [step, setStep] = useState(1);
   const [license, setLicense] = useState("");
   const [experience, setExperience] = useState("");
