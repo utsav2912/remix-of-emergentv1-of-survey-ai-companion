@@ -9,6 +9,8 @@ interface Profile {
   irdai_license: string | null;
   city: string | null;
   claims_used: number;
+  role: string;
+  default_mode: string;
 }
 
 interface AuthContextType {
@@ -40,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, subscription_tier, onboarding_complete, irdai_license, city, claims_used")
+      .select("full_name, subscription_tier, onboarding_complete, irdai_license, city, claims_used, role, default_mode")
       .eq("user_id", userId)
       .single();
     if (data) setProfile(data as Profile);

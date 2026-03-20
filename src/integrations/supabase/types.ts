@@ -199,10 +199,12 @@ export type Database = {
           city: string | null
           claims_used: number
           created_at: string
+          default_mode: string
           full_name: string | null
           id: string
           irdai_license: string | null
           onboarding_complete: boolean
+          role: string
           subscription_tier: string
           user_id: string
         }
@@ -210,10 +212,12 @@ export type Database = {
           city?: string | null
           claims_used?: number
           created_at?: string
+          default_mode?: string
           full_name?: string | null
           id?: string
           irdai_license?: string | null
           onboarding_complete?: boolean
+          role?: string
           subscription_tier?: string
           user_id: string
         }
@@ -221,10 +225,12 @@ export type Database = {
           city?: string | null
           claims_used?: number
           created_at?: string
+          default_mode?: string
           full_name?: string | null
           id?: string
           irdai_license?: string | null
           onboarding_complete?: boolean
+          role?: string
           subscription_tier?: string
           user_id?: string
         }
