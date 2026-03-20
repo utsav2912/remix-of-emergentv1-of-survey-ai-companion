@@ -42,13 +42,13 @@ export function CalculationBreakdownCard() {
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <Calculator className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg">Calculation Breakdown</CardTitle>
+          <CardTitle className="text-lg">Loss Assessment Breakdown</CardTitle>
           <Tooltip>
             <TooltipTrigger asChild>
               <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-xs">Based on IRDAI S-06 schedule</p>
+              <p className="text-xs">Based on IRDAI Motor Survey Loss Assessment Schedule</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -107,7 +107,7 @@ export function CalculationBreakdownCard() {
             ["Net Parts Value", `₹${fmt(netParts)}`],
             ["Labour Charges", `₹${fmt(labour)}`],
             ["Subtotal", `₹${fmt(subtotal)}`],
-            ["Less: Compulsory Excess", `−₹${fmt(compExcess)}`],
+            ["Less: Compulsory Excess (as per policy)", `−₹${fmt(compExcess)}`],
             ["Taxable Amount", `₹${fmt(taxable)}`],
             ["GST (18%)", `+₹${fmt(gst)}`],
           ].map(([label, value]) => (
@@ -130,7 +130,7 @@ export function CalculationBreakdownCard() {
         <div className="flex items-center gap-1.5 mt-2 text-xs text-[hsl(var(--success))]">
           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
           <span>
-            ₹{fmt(netPayable)} / IDV ₹{fmt(idv)} = {ctlPercent}% — NOT a constructive total loss
+            ₹{fmt(netPayable)} / IDV ₹{fmt(idv)} = {ctlPercent}% — NOT a Constructive Total Loss (when repair cost &gt; 75% of IDV)
           </span>
         </div>
       </CardContent>

@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 gsap.registerPlugin(ScrollTrigger);
 
 const features = [
-  { icon: Shield, title: "IRDAI S-06 Compliant", desc: "Every depreciation follows official IRDAI schedules" },
+  { icon: Shield, title: "IRDAI Assessment Engine", desc: "Every depreciation follows official IRDAI schedules" },
   { icon: LayoutTemplate, title: "Multi-Insurer Templates", desc: "Report formats for New India, Oriental, United India, National" },
   { icon: Brain, title: "AI Parts Identification", desc: "AI reads damage photos and suggests parts & repair types" },
   { icon: FileSearch, title: "Auto Policy Reading", desc: "Upload policy PDF; insurer and IDV extracted automatically" },

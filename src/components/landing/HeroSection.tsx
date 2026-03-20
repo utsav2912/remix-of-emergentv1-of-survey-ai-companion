@@ -103,7 +103,7 @@ const HeroSection = () => {
             transition={{ delay: 0.6, duration: 0.6 }}
             className="text-lg text-white/60 max-w-[520px] leading-relaxed"
           >
-            AI-powered damage assessment, automatic S-06 depreciation calculations,
+            AI-powered damage assessment, automatic IRDAI-compliant depreciation calculations,
             and insurer-ready PDF reports — for licensed motor surveyors across India.
           </motion.p>
 

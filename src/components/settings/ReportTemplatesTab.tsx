@@ -11,7 +11,7 @@ const templates = [
   { id: "oriental", label: "Oriental Insurance Standard", isDefault: false },
   { id: "united", label: "United India Standard", isDefault: false },
   { id: "national", label: "National Insurance Standard", isDefault: false },
-  { id: "generic", label: "Generic IRDAI Format", isDefault: false },
+  { id: "generic", label: "Generic IRDAI-compliant Format", isDefault: false },
 ];
 
 export function ReportTemplatesTab() {
