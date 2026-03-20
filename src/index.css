@@ -68,3 +68,30 @@
     font-size: 16px !important;
   }
 }
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes float-card {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes noise {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  30% { transform: translate(3%, -15%); }
+  50% { transform: translate(-10%, 5%); }
+  70% { transform: translate(8%, 10%); }
+  90% { transform: translate(-3%, 8%); }
+}
+
+.animate-float-card {
+  animation: float-card 8s ease-in-out infinite;
+}
+
+.animate-noise {
+  animation: noise 8s steps(5) infinite;
+}
