@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Upload, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
+import { RoleSelectionCard } from "@/components/onboarding/RoleSelectionCard";
 
 const insurers = [
   "New India Assurance",
@@ -38,8 +39,9 @@ const experienceOptions = ["<1 year", "1-3 years", "3-5 years", "5-10 years", "1
 
 const Onboarding = () => {
   const navigate = useNavigate();
-  const { user, profile, loading, refreshProfile } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [step, setStep] = useState(1);
+  const [role, setRole] = useState("");
   const [license, setLicense] = useState("");
   const [experience, setExperience] = useState("");
   const [city, setCity] = useState("");
@@ -73,6 +75,8 @@ const Onboarding = () => {
                 <h2 className="text-xl font-bold text-foreground">Tell us about yourself</h2>
                 <p className="text-sm text-muted-foreground mt-1">Help us customize your experience</p>
               </div>
+
+              <RoleSelectionCard selectedRole={role} onSelect={setRole} />
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -108,7 +112,7 @@ const Onboarding = () => {
                 </div>
               </div>
 
-              <Button onClick={nextStep} className="w-full gap-2">
+              <Button onClick={nextStep} className="w-full gap-2" disabled={!role}>
                 Continue <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -181,11 +185,17 @@ const Onboarding = () => {
                   if (user) {
                     await supabase
                       .from("profiles")
-                      .update({ onboarding_complete: true, irdai_license: license, city } as any)
+                      .update({
+                        onboarding_complete: true,
+                        irdai_license: license,
+                        city,
+                        role,
+                        default_mode: role === "surveyor" ? "mobile" : "desktop",
+                      } as any)
                       .eq("user_id", user.id);
                     await refreshProfile();
                   }
-                  navigate("/dashboard");
+                  navigate(role === "surveyor" ? "/survey" : "/dashboard");
                 }}
                 className="w-full"
                 size="lg"

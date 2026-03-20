@@ -16,7 +16,7 @@ export function AuthRedirect({ children }: { children: React.ReactNode }) {
 
   if (user) {
     if (profile?.onboarding_complete) {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to={profile.role === "surveyor" ? "/survey" : "/dashboard"} replace />;
     }
     return <Navigate to="/onboarding" replace />;
   }

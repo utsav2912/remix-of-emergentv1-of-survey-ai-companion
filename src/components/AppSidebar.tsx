@@ -1,6 +1,6 @@
-import { Car, LayoutDashboard, FileText, FilePlus, BarChart3, Settings } from "lucide-react";
+import { Car, LayoutDashboard, FileText, FilePlus, BarChart3, Settings, ArrowLeftRight } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +15,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -28,7 +30,8 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const { user, profile, refreshProfile } = useAuth();
 
   const displayName = profile?.full_name || user?.email || "User";
   const initials = displayName
@@ -38,6 +41,19 @@ export function AppSidebar() {
     .slice(0, 2)
     .toUpperCase();
   const isPro = profile?.subscription_tier === "pro";
+  const isSurveyor = profile?.role === "surveyor";
+
+  const handleSwitchMode = async () => {
+    if (!user) return;
+    const newRole = isSurveyor ? "assistant" : "surveyor";
+    await supabase
+      .from("profiles")
+      .update({ role: newRole } as any)
+      .eq("user_id", user.id);
+    await refreshProfile();
+    toast.success(`Switched to ${newRole === "surveyor" ? "Survey" : "Desktop"} mode`);
+    navigate(newRole === "surveyor" ? "/survey" : "/dashboard");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-none">
@@ -96,14 +112,28 @@ export function AppSidebar() {
               {user?.email && (
                 <span className="text-[11px] text-sidebar-muted truncate">{user.email}</span>
               )}
-              <Badge className={`mt-0.5 w-fit text-[10px] px-1.5 py-0 rounded-sm ${
-                isPro ? "bg-primary text-primary-foreground" : "bg-sidebar-accent text-sidebar-muted"
-              }`}>
-                {isPro ? "Pro" : "Free Trial"}
-              </Badge>
+              <div className="flex items-center gap-1 mt-0.5">
+                <Badge className={`w-fit text-[10px] px-1.5 py-0 rounded-sm ${
+                  isPro ? "bg-primary text-primary-foreground" : "bg-sidebar-accent text-sidebar-muted"
+                }`}>
+                  {isPro ? "Pro" : "Free Trial"}
+                </Badge>
+                <Badge className="w-fit text-[10px] px-1.5 py-0 rounded-sm bg-sidebar-accent text-sidebar-muted">
+                  {isSurveyor ? "Surveyor" : "Assistant"}
+                </Badge>
+              </div>
             </div>
           )}
         </div>
+        {!collapsed && (
+          <button
+            onClick={handleSwitchMode}
+            className="flex items-center gap-1.5 mt-2 text-[11px] text-sidebar-muted hover:text-sidebar-foreground transition-colors"
+          >
+            <ArrowLeftRight className="h-3 w-3" />
+            {isSurveyor ? "Switch to Desktop Mode" : "Switch to Survey Mode"}
+          </button>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

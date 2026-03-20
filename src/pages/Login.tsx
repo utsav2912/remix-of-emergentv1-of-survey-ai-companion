@@ -33,11 +33,11 @@ const Login = () => {
       // Check onboarding status to route correctly
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("onboarding_complete")
+        .select("onboarding_complete, role")
         .eq("user_id", data.user.id)
         .single();
       if (profileData?.onboarding_complete) {
-        navigate("/dashboard");
+        navigate(profileData.role === "surveyor" ? "/survey" : "/dashboard");
       } else {
         navigate("/onboarding");
       }
