@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AuthRedirect } from "@/components/AuthRedirect";
+import { OnboardingRoute } from "@/components/OnboardingRoute";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Claims from "./pages/Claims";
@@ -28,9 +30,9 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/login" element={<AuthRedirect><Login /></AuthRedirect>} />
+            <Route path="/signup" element={<AuthRedirect><Signup /></AuthRedirect>} />
+            <Route path="/onboarding" element={<OnboardingRoute><Onboarding /></OnboardingRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/claims" element={<ProtectedRoute><Claims /></ProtectedRoute>} />
             <Route path="/new-claim" element={<ProtectedRoute><NewClaim /></ProtectedRoute>} />
