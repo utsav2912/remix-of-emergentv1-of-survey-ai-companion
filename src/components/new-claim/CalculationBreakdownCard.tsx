@@ -42,13 +42,13 @@ export function CalculationBreakdownCard() {
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <Calculator className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg">Calculation Breakdown</CardTitle>
+          <CardTitle className="text-lg">Loss Assessment Breakdown</CardTitle>
           <Tooltip>
             <TooltipTrigger asChild>
               <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-xs">Based on IRDAI S-06 schedule</p>
+              <p className="text-xs">Based on IRDAI Motor Survey Loss Assessment Schedule</p>
             </TooltipContent>
           </Tooltip>
         </div>
