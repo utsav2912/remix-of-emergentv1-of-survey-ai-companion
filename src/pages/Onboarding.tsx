@@ -176,7 +176,20 @@ const Onboarding = () => {
                 </p>
               </div>
 
-              <Button onClick={() => navigate("/")} className="w-full" size="lg">
+              <Button
+                onClick={async () => {
+                  if (user) {
+                    await supabase
+                      .from("profiles")
+                      .update({ onboarding_complete: true, irdai_license: license, city } as any)
+                      .eq("user_id", user.id);
+                    await refreshProfile();
+                  }
+                  navigate("/dashboard");
+                }}
+                className="w-full"
+                size="lg"
+              >
                 Go to Dashboard
               </Button>
 
