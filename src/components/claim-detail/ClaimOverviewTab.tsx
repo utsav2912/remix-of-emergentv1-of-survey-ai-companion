@@ -18,7 +18,7 @@ const sections = [
       ["Insurer", "New India Assurance"],
       ["Policy No.", "11010031250001234"],
       ["IDV", "₹5,20,000"],
-      ["NIL Dep", "Yes ✓"],
+      ["Zero Dep Add-on", "Yes ✓"],
       ["Compulsory Excess", "₹1,000"],
       ["Voluntary Excess", "₹0"],
       ["Policy Period", "01 Apr 2025 – 31 Mar 2026"],

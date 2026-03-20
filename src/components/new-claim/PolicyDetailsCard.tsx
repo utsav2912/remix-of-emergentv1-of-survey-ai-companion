@@ -152,6 +152,7 @@ export function PolicyDetailsCard({ data, errors, onChange }: PolicyDetailsCardP
         {/* Compulsory Excess */}
         <div className="space-y-1.5">
           <Label>Compulsory Excess</Label>
+          <p className="text-xs text-muted-foreground -mt-1">(as per policy, typically ₹1,000–₹2,000)</p>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
             <Input

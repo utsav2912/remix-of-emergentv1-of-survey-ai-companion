@@ -8,7 +8,7 @@ const summaryRows: [string, string][] = [
   ["Insurer", "New India Assurance"],
   ["Policy", "11010031250001234"],
   ["IDV", "₹5,20,000"],
-  ["NIL Dep", "Yes ✓"],
+  ["Zero Dep Add-on", "Yes ✓"],
   ["Compulsory Excess", "₹1,000"],
   ["Voluntary Excess", "₹0"],
 ];

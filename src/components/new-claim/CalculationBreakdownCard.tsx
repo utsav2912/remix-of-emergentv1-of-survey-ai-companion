@@ -130,7 +130,7 @@ export function CalculationBreakdownCard() {
         <div className="flex items-center gap-1.5 mt-2 text-xs text-[hsl(var(--success))]">
           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
           <span>
-            ₹{fmt(netPayable)} / IDV ₹{fmt(idv)} = {ctlPercent}% — NOT a constructive total loss
+            ₹{fmt(netPayable)} / IDV ₹{fmt(idv)} = {ctlPercent}% — NOT a Constructive Total Loss (when repair cost &gt; 75% of IDV)
           </span>
         </div>
       </CardContent>
